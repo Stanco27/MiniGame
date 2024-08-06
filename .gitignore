@@ -1,0 +1,25 @@
+/Assets/TextMesh Pro/
+/Assets/Images/
+/Assets/Scenes/
+/Packages/
+/.vscode/
+/ProjectSettings/
+/Temp/
+
+*.csproj
+*.pidb
+*.suo
+*.user
+*.userprefs
+*.unityproj
+*.swp
+*.tmp
+*.log
+*.meta
+Mini Game.sln
+
+/Build/
+[Oo]bj/
+[Ll]ibrary/
+[Mm]emoryCaptures/
+Logs/
