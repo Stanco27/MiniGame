@@ -4,40 +4,61 @@ using UnityEngine;
 
 public class Player : CharacterStats
 {
-    public float radius = 2f;
-    public LayerMask enemyLayer;
 
-    void Update()
+    public float radius;
+    public LayerMask enemyLayer;
+    public GameObject gameover;
+    public float knockback = 0.05f;
+    public bool isKnocked = false;
+    public bool canGroundCheck = true;
+
+    private void KnockBack(Collision2D other)
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            Debug.Log("Attack");
-            Attack();
+        isKnocked = true;
+        canGroundCheck = false;
+        rb.velocity = Vector2.zero;
+
+        Vector2 direction = (transform.position - other.transform.position).normalized;
+        if(direction.x < 0) {
+            direction.x = -0.5f;
+        } else {
+            direction.x = 0.5f;
         }
+
+        Vector2 knockbackForce = new Vector2(direction.x * knockback, direction.y * knockback * 0.5f);
+        rb.AddForce(knockbackForce, ForceMode2D.Impulse);
+        StartCoroutine(DelayGroundCheck(0.2f));
     }
 
-    public void Attack()
+    private IEnumerator DelayGroundCheck(float delay)
     {
-        Vector2 center = transform.position;
+        yield return new WaitForSeconds(delay);
+        canGroundCheck = true;
+        Debug.Log("Knockback ended. isKnocked reset to: " + isKnocked);
+    }
 
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(center, radius, enemyLayer);
-        foreach (Collider2D collider in hitColliders)
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.gameObject.CompareTag("Enemy"))
         {
-            if (collider.gameObject.layer == LayerMask.NameToLayer("Enemy") &&
-                collider.TryGetComponent<CharacterStats>(out var characterStats))
+            CharacterStats enemyStats = other.gameObject.GetComponent<CharacterStats>();
+
+            if (enemyStats != null)
             {
-                characterStats.healthChange(-damage);
+                KnockBack(other);
+                HealthChange(-enemyStats.damage);
+                Debug.Log(health);
+            }
+            else
+            {
+                Debug.LogWarning("Enemy does not have a CharacterStats component.");
             }
         }
     }
 
-    // Draw the radius in the Scene view
-    private void OnDrawGizmos()
+    public void GameOver()
     {
-        // Set the Gizmo color
-        Gizmos.color = Color.red;
-
-        // Draw a wire sphere to visualize the radius
-        Gizmos.DrawWireSphere(transform.position, radius);
+        gameover.SetActive(true);
     }
 }

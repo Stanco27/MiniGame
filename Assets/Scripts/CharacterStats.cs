@@ -1,20 +1,37 @@
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor.Callbacks;
 using UnityEngine;
 
 public class CharacterStats : MonoBehaviour
 {
 
-    private int health;
     public int damage = 1;
-    public int maxHealth;
+    public int maxHealth = 10;
+    public int health;
     public Animator animator;
+    public bool isDying = false;
+    public Rigidbody2D rb;
+    
 
-    void Start() {
+
+    public int getDamamge { get { return damage; } }
+
+    void Start()
+    {
         health = maxHealth;
+
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+            if (animator == null)
+            {
+                Debug.LogWarning("Animator component not found on " + gameObject.name);
+            }
+        }
     }
 
-    public void healthChange(int number)
+    public void HealthChange(int number)
     {
         health += number;
         if (health > maxHealth)
@@ -29,8 +46,12 @@ public class CharacterStats : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log("Dead");
-        gameObject.SetActive(false);
+        isDying = true;
+        animator.SetTrigger("Dead");
+    }
+    public void OnDeathAnimation()
+    {
+        Destroy(gameObject);
     }
 
 }
